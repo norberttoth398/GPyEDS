@@ -94,7 +94,7 @@ def create_two_layer_GPAM_from_scratch(num_input, num_data = 1, Z = None, num_in
     else:
         return model
 
-def model_inference_(data, encoder,batch_size=20000):
+def model_inference(data, encoder,batch_size=20000):
     """_summary_
 
     Args:

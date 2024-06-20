@@ -4,6 +4,20 @@ import scipy.interpolate as interpolate
 
 
 def draw_line(img, x0, y0, x1, y1, value = 1, pstep = None):
+        """_summary_
+
+        Args:
+            img (_type_): _description_
+            x0 (_type_): _description_
+            y0 (_type_): _description_
+            x1 (_type_): _description_
+            y1 (_type_): _description_
+            value (int, optional): _description_. Defaults to 1.
+            pstep (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
         mat = np.zeros_like(img)
         step_number  = int(abs(x0-x1) + abs(y0-y1)) #Number of steps
         if step_number < 2:
@@ -24,6 +38,21 @@ def draw_line(img, x0, y0, x1, y1, value = 1, pstep = None):
         return img[mat.astype("bool")]
 
 def draw_proj_box(img, x0, y0, x1, y1, phi = 45, value = 1, pstep = 1):
+    """_summary_
+
+    Args:
+        img (_type_): _description_
+        x0 (_type_): _description_
+        y0 (_type_): _description_
+        x1 (_type_): _description_
+        y1 (_type_): _description_
+        phi (int, optional): _description_. Defaults to 45.
+        value (int, optional): _description_. Defaults to 1.
+        pstep (int, optional): _description_. Defaults to 1.
+
+    Returns:
+        _type_: _description_
+    """
     v = np.asarray([x1, y1]) - np.asarray([x0,y0])
     theta = np.arccos(v[1]/(np.sqrt(v[1]**2+v[0]**2)))
     phi = theta + np.pi*(phi/180)
@@ -66,18 +95,28 @@ def draw_proj_box(img, x0, y0, x1, y1, phi = 45, value = 1, pstep = 1):
     return np.asarray(conc)
 
 def align_once(inputmatrix, pos, theta):
+    """_summary_
+
+    Args:
+        inputmatrix (_type_): _description_
+        pos (_type_): _description_
+        theta (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     #slope = theta[5]
     #intercept = theta[6]
     #ax, ay, bx, by, ww, slope, intercept = P[0:Nvalues]
-    #ww = int(theta[4])
+    ww = int(theta[4])
     n = np.max(pos).astype("int64")
     ax = int(theta[0])
     ay = int(theta[1])
     bx = int(theta[2])
     by = int(theta[3])
-    #phi = theta[7]
+    phi = theta[7]
 
-    vals = draw_proj_box(inputmatrix, ax, ay, bx, by, 90, pstep = 5)
+    vals = draw_proj_box(inputmatrix, ax, ay, bx, by, phi, pstep = ww)
     steps = np.linspace(0, len(vals)-1, len(vals))
     steps = steps[~np.isnan(vals)]
     vals = vals[~np.isnan(vals)]
@@ -91,13 +130,22 @@ def align_once(inputmatrix, pos, theta):
             steps = np.concatenate([[0], steps])
             vals = np.concatenate([[0], vals])
 
-    interpolation = interpolate.interp1d(steps, vals)
-    trial_x = interpolation(np.linspace(0, len(vals)-1, n))[pos]
-
+    interpolation = interpolate.interp1d(steps/np.max(steps), vals)
+    trial_x = interpolation(np.abs(pos/n))
     return trial_x
 
 
 def align(inputmatrix, theta, pos, **kwargs):
+    """_summary_
+
+    Args:
+        inputmatrix (_type_): _description_
+        theta (_type_): _description_
+        pos (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     slope = theta[5]
     intercept = theta[6]
     #ax, ay, bx, by, ww, slope, intercept = P[0:Nvalues]
@@ -130,17 +178,6 @@ def align(inputmatrix, theta, pos, **kwargs):
     return trial_x*slope + intercept
 
 
-def test_ssfun(theta, data):
-    xdata = data.xdata[0]
-    ydata = data.ydata[0]
-    # eval model
-    try:
-        ymodel = align(xdata, len(ydata), theta)
-    except IndexError:
-         ymodel = np.inf
-    # calc sos
-    ss = sum((ymodel - ydata)**2)
-    return ss
 
 class logfuncs():
      
@@ -151,12 +188,32 @@ class logfuncs():
 
 
     def log_prior(self,theta):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         ax, ay, bx, by, ww, m, b, phi = theta
         if self.pmin[0] < ax < self.pmax[0] and self.pmin[1] < ay < self.pmax[1] and self.pmin[2] < bx < self.pmax[2] and self.pmin[3] < by < self.pmax[3] and self.pmin[4] < ww < self.pmax[4] and self.pmin[5] < m < self.pmax[5] and self.pmin[6] < b < self.pmax[6] and self.pmin[7] < phi <self.pmax[7]:
             return 0.0
         return -np.inf
 
     def log_likelihood(self,theta, x, y, yerr, pos):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+            x (_type_): _description_
+            y (_type_): _description_
+            yerr (_type_): _description_
+            pos (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         try:
             model = align(x, theta, pos )
         except IndexError:
@@ -168,6 +225,18 @@ class logfuncs():
     
 
     def log_probability(self,theta, x, y, yerr, pos):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+            x (_type_): _description_
+            y (_type_): _description_
+            yerr (_type_): _description_
+            pos (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         lp = self.log_prior(theta)
         if not np.isfinite(lp):
             return -np.inf
@@ -182,12 +251,31 @@ class simple_logfuncs():
 
 
     def log_prior(self,theta):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         m, b = theta
         if self.pmin[0] < m < self.pmax[0] and self.pmin[1] < b < self.pmax[1]:
             return 0.0
         return -np.inf
 
     def log_likelihood(self,theta, x, y, yerr):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+            x (_type_): _description_
+            y (_type_): _description_
+            yerr (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         try:
             model = x*theta[0] + theta[1]
         except IndexError:
@@ -198,15 +286,44 @@ class simple_logfuncs():
     
 
     def log_probability(self,theta, x, y, yerr):
+        """_summary_
+
+        Args:
+            theta (_type_): _description_
+            x (_type_): _description_
+            y (_type_): _description_
+            yerr (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         lp = self.log_prior(theta)
         if not np.isfinite(lp):
             return -np.inf
         return lp + self.log_likelihood(theta, x, y, yerr)
     
 
-def MCMC_run(x,y, uncert, params, pmin, pmax, positions, num_iter = 10000, return_ = False, name = "mcmc"):
-    
+def MCMC_run(x,y, uncert, params, pmin, pmax, positions = None, num_iter = 10000, return_ = False, name = "mcmc"):
+    """_summary_
 
+    Args:
+        x (_type_): _description_
+        y (_type_): _description_
+        uncert (_type_): _description_
+        params (_type_): _description_
+        pmin (_type_): _description_
+        pmax (_type_): _description_
+        positions (_type_): _description_
+        num_iter (int, optional): _description_. Defaults to 10000.
+        return_ (bool, optional): _description_. Defaults to False.
+        name (str, optional): _description_. Defaults to "mcmc".
+
+    Returns:
+        _type_: _description_
+    """
+    
+    if positions is None:
+        positions = np.linspace(0,len(y)-1,len(y))
     names   = ["ax","ay", "bx", "by", "ww", "m", "b", "phi"]
 
     funcs = logfuncs(pmin,pmax)
@@ -240,10 +357,26 @@ def MCMC_run(x,y, uncert, params, pmin, pmax, positions, num_iter = 10000, retur
          return sampler
 
 
-def Simple_MCMC_run(x,y, uncert, params, pmin, pmax, return_ = False, name = "mcmc"):
+def Simple_MCMC_run(x,y, uncert, params, pmin, pmax,num_iter = 1e4, return_ = False, name = "mcmc"):
+    """_summary_
+
+    Args:
+        x (_type_): _description_
+        y (_type_): _description_
+        uncert (_type_): _description_
+        params (_type_): _description_
+        pmin (_type_): _description_
+        pmax (_type_): _description_
+        num_iter (_typer_): description_. Defaults to 1e4
+        return_ (bool, optional): _description_. Defaults to False.
+        name (str, optional): _description_. Defaults to "mcmc".
+
+    Returns:
+        _type_: _description_
+    """
     
 
-    names   = ["ax","ay", "bx", "by", "ww", "m", "b", "phi"]
+    #names   = ["m", "b"]
 
     funcs = simple_logfuncs(pmin,pmax)
     from scipy.optimize import minimize
@@ -265,7 +398,7 @@ def Simple_MCMC_run(x,y, uncert, params, pmin, pmax, return_ = False, name = "mc
         sampler = emcee.EnsembleSampler(
         nwalkers, ndim, funcs.log_probability, args=(x, y, uncert), backend = backend, pool = pool
         )
-        sampler.run_mcmc(pos, 10000, progress=True)
+        sampler.run_mcmc(pos, num_iter, progress=True)
     #, moves=[(emcee.moves.DEMove(), 0.8),(emcee.moves.DESnookerMove(), 0.2)]
     samples = sampler.get_chain()
     import pickle
