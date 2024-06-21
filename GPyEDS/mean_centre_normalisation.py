@@ -10,8 +10,17 @@ import skimage.filters as filters
 
 
 def mean_centre(feature, return_params = False):
-    """
-    Function to perform mean normalisation on the dataset passed to it.    
+    """_summary_
+
+    Args:
+        feature (_type_): _description_
+        return_params (bool, optional): _description_. Defaults to False.
+
+    Raises:
+        ValueError: _description_
+
+    Returns:
+        _type_: _description_
     """
     
     

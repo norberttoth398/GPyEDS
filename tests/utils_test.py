@@ -31,6 +31,7 @@ def test_feature_norm():
     dummy = np.random.rand(100, 7)
 
     norm, params = utils.feature_normalisation(dummy, True)
+    norm1, params1 = utils.feature_normalisation(dummy[:,0], True)
 
 def test_get_masks():
     dummy = np.random.randint(5, size = (100,100))
