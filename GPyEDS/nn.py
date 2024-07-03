@@ -6,16 +6,16 @@ import tensorflow as tf
 
 
 def create_nn_AE(input_dim, latent_dim = 2, hidden = [10], activation = "relu"):
-    """_summary_
+    """Generator function for neural network autoencoder architecture. 
 
     Args:
-        input_dim (_type_): _description_
-        latent_dim (int, optional): _description_. Defaults to 2.
-        hidden (list, optional): _description_. Defaults to [10].
-        activation (str, optional): _description_. Defaults to "relu".
+        input_dim (int): Input dimensions for model.
+        latent_dim (int, optional): Latent space dimensions/bottleneck size. Defaults to 2.
+        hidden (list, optional): Dimensions for hidden layers - note model will be symmetric. Defaults to [10].
+        activation (str, optional): Activation functions to use. Defaults to "relu".
 
     Returns:
-        _type_: _description_
+        model (TF model): Autoencoder model.
     """
 
     enc_list = []

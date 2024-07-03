@@ -7,16 +7,16 @@ from pathlib import Path
 import os
 
 def create_two_layer_GPAM_from_data(input_data, num_inducing = 50, return_layers = False, n_latent = 2):
-    """_summary_
+    """Generator function to create 2 layer GP using GPFlux given a dataset and its dimensions etc.
 
     Args:
-        input_data (_type_): _description_
-        num_inducing (int, optional): _description_. Defaults to 50.
-        return_layers (bool, optional): _description_. Defaults to False.
-        n_latent (int, optional): _description_. Defaults to 2.
+        input_data (ndarray): dataset to be used to train model - this is where we get parameters off of.
+        num_inducing (int, optional): Number of inducing points to use. Defaults to 50.
+        return_layers (bool, optional): Set to true if individual layers are to be returned alongside model. Defaults to False.
+        n_latent (int, optional): Dimension of latent space. Defaults to 2.
 
     Returns:
-        _type_: _description_
+        model (gpflux model): final model object.
     """
 
     num_data = input_data.shape[0]
@@ -49,18 +49,17 @@ def create_two_layer_GPAM_from_data(input_data, num_inducing = 50, return_layers
         return model
     
 def create_two_layer_GPAM_from_scratch(num_input, num_data = 1, Z = None, num_inducing = 50, return_layers = False, n_latent = 2):
-    """_summary_
-
+    """Generator function to create two layer GPAM model in GPFlux. 
     Args:
-        num_input (_type_): _description_
-        num_data (int, optional): _description_. Defaults to 1.
-        Z (_type_, optional): _description_. Defaults to None.
-        num_inducing (int, optional): _description_. Defaults to 50.
-        return_layers (bool, optional): _description_. Defaults to False.
-        n_latent (int, optional): _description_. Defaults to 2.
+        num_input (int): Number of input dimensions.
+        num_data (int, optional): Number of data points used for training, important to calculate loss properly. Defaults to 1.
+        Z (ndarray, optional): Array of inducing locations. Defaults to None - will be generated at random.
+        num_inducing (int, optional): Number of inducing points. Defaults to 50.
+        return_layers (bool, optional): Set to true if individual layers are to be returned alongside model. Defaults to False.
+        n_latent (int, optional): Dimension of latent space. Defaults to 2.
 
     Returns:
-        _type_: _description_
+        model (gpflux model): final model object.
     """
 
     if Z is not None:
@@ -95,15 +94,15 @@ def create_two_layer_GPAM_from_scratch(num_input, num_data = 1, Z = None, num_in
         return model
 
 def model_inference(data, encoder,batch_size=20000):
-    """_summary_
+    """ Utility function for batched model inference to reduce memory usage. 
 
     Args:
-        data (_type_): _description_
-        encoder (_type_): _description_
-        batch_size (int, optional): _description_. Defaults to 20000.
+        data (ndarray): Data to be used for inference.
+        encoder (model layer): Encoding layer(s) from GPAM model to use for inference. 
+        batch_size (int, optional): Size of batch to use - this depends on memory to be used. Defaults to 20000.
 
     Returns:
-        _type_: _description_
+        latents (tuple of 2 ndarrays): Mean and variance of latent distributions for every data point.
     """
     import tqdm
     max_iter = len(data)/batch_size

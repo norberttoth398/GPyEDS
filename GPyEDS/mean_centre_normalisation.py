@@ -10,17 +10,17 @@ import skimage.filters as filters
 
 
 def mean_centre(feature, return_params = False):
-    """_summary_
+    """Perform mean centralisation - simply just subtracts mean.
 
     Args:
-        feature (_type_): _description_
-        return_params (bool, optional): _description_. Defaults to False.
+        feature (ndarra): feature array to normalise
+        return_params (bool, optional): Change to True to return parameters of normalisation. Defaults to False.
 
     Raises:
-        ValueError: _description_
+        ValueError: Raise error if feature array is >2D
 
     Returns:
-        _type_: _description_
+        normalsied features (ndarray): Normalised features.
     """
     
     
