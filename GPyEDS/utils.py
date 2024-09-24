@@ -402,10 +402,6 @@ def plot_decomp(scores, comps, plot_return = False, elements = None,
     
     fig, ax = plt.subplots(len(comps), 2, figsize = (12,24))
     
-    if elements is None:
-        elements = [i for i in range(len(comps[:]))]
-    else:
-        pass
 
     
     for i in range(len(comps)):
@@ -556,7 +552,10 @@ def decompose(data, n_components = 2, method = "pca", tol = 0.05,
     else:
         raise ValueError("Input array needs to have 2 or 3 dimensions or be Pandas dataframe.")
      
-      
+    if data_mask is None:
+        data_mask = np.ones((data.shape[0], 1))
+    if elements is None:
+        elements = [i for i in range(data.shape[1])]
     
     start = time.time()
     

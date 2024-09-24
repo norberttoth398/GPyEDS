@@ -45,3 +45,9 @@ def test_build_conc():
     df = pd.DataFrame(data = {"X": xx.ravel().astype("int64"), "Y": yy.ravel().astype("int64"), "val": r})
 
     _ = utils.build_conc_map(df)
+
+def test_decomp():
+    return None
+
+def test_plot_decomp():
+    return None
