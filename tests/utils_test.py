@@ -47,7 +47,11 @@ def test_build_conc():
     _ = utils.build_conc_map(df)
 
 def test_decomp():
+    data = np.random.randn(100,4)
+    r = utils.decompose(data)
     return None
 
 def test_plot_decomp():
+    data = np.random.randn(100,4)
+    r = utils.decompose(data, plot = True)
     return None
