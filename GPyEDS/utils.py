@@ -24,9 +24,9 @@ def remove_pc_comp(conc_map, comp2remove):
     new_sc[:,comp2remove] = 0
     nd = pca.inverse_transform(new_sc) + pca.mean_
 
-    conc_map = np.zeros((maps[0].shape[0], maps[0].shape[1],len(maps)))
+    conc_map = np.zeros((conc_map.shape[0], conc_map.shape[1],conc_map.shape[2]))
     for i in range(nd.shape[1]):
-        conc_map[:,:,i] = utils.get_img(nd[:,i], dummy_mask)
+        conc_map[:,:,i] = get_img(nd[:,i], dummy_mask)
 
 
     return conc_map
