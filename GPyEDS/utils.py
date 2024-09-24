@@ -13,6 +13,24 @@ import skimage.morphology as morph
 import skimage.measure as measure
 import skimage.filters as filters
 
+def remove_pc_comp(conc_map, comp2remove):
+    from sklearn.decomposition import PCA
+    dummy_mask = np.ones((conc_map.shape[0], conc_map.shape[1]), dtype = "bool")
+
+    pca = PCA(n_components=conc_map.shape[-1]-1).fit(np.nan_to_num(conc_map[dummy_mask]))
+    sc = pca.transform(np.nan_to_num(conc_map[dummy_mask]))
+
+    new_sc = sc.copy()
+    new_sc[:,comp2remove] = 0
+    nd = pca.inverse_transform(new_sc) + pca.mean_
+
+    conc_map = np.zeros((maps[0].shape[0], maps[0].shape[1],len(maps)))
+    for i in range(nd.shape[1]):
+        conc_map[:,:,i] = utils.get_img(nd[:,i], dummy_mask)
+
+
+    return conc_map
+
 def split_at(string, char, n):
     """
     Splits string into two at the nth occurence of the character specified.
@@ -49,7 +67,7 @@ def get_img(values, mask):
         Transformed image showing the values passed in their respective locations.
 
     """    
-    new_array = np.zeros_like(mask)
+    new_array = np.zeros_like(mask, dtype = values.dtype)
     new_array[:] = np.nan
 
     np.place(new_array, mask.astype('bool'), values)
@@ -555,7 +573,7 @@ def decompose(data, n_components = 2, method = "pca", tol = 0.05,
     if data_mask is None:
         data_mask = np.ones((data.shape[0], 1))
     if elements is None:
-        elements = [i for i in range(data.shape[1])]
+        elements = [i for i in range(data.shape[-1])]
     
     start = time.time()
     

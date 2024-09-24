@@ -32,7 +32,7 @@ def linear_filter(map, mask, range_, type = "mean", sigma = None):
     maskres = scipy.signal.convolve2d(pmask, np.asarray(filter), boundary = "symm", mode = "same")
 
     r = np.divide(np.multiply(meanres, pmask), maskres)
-    r[~pmask.astype("bool")] = 0
+    r[~pmask.astype("bool")] = np.nan
     return r[range_:-range_, range_:-range_]
 
 def median_filter(map, mask, range_):
@@ -50,6 +50,6 @@ def median_filter(map, mask, range_):
 
                 medianres[i, j] += np.median(region)
 
-    medianres[~mask] = 0
+    medianres[~mask] = np.nan
 
     return medianres
