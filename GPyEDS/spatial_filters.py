@@ -31,7 +31,9 @@ def linear_filter(map, mask, range_, type = "mean", sigma = None):
     meanres = scipy.signal.convolve2d(np.multiply(pmap,pmask), np.asarray(filter), boundary = "symm", mode = "same")
     maskres = scipy.signal.convolve2d(pmask, np.asarray(filter), boundary = "symm", mode = "same")
 
-    return np.divide(np.multiply(meanres, pmask), maskres)
+    r = np.divide(np.multiply(meanres, pmask), maskres)
+    r[~pmask.astype("bool")] = 0
+    return r[range_:-range_, range_:-range_]
 
 def median_filter(map, mask, range_):
     pmap = np.pad(map, (range_, range_), mode = "constant")
