@@ -28,7 +28,7 @@ def linear_filter(map, mask, range_, type = "mean", sigma = None):
     pmap = np.pad(map, (range_, range_), mode = "constant")
     pmask = np.pad(mask, (range_, range_), mode = "constant")
     
-    meanres = scipy.signal.convolve2d(np.multiply(pmap*pmask), np.asarray(filter), boundary = "symm", mode = "same")
+    meanres = scipy.signal.convolve2d(np.multiply(pmap,pmask), np.asarray(filter), boundary = "symm", mode = "same")
     maskres = scipy.signal.convolve2d(pmask, np.asarray(filter), boundary = "symm", mode = "same")
 
     return np.divide(np.multiply(meanres, pmask), maskres)
