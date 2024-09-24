@@ -1,0 +1,26 @@
+site_name: GPyEDS
+
+copyright: Copyright (c) 2024 Norbert Toth
+
+theme:
+    name: readthedocs
+    highlightjs: true
+
+plugins:
+  - search
+  - mkdocstrings
+  - mkdocs-jupyter
+
+nav:
+  - GPyEDS: index.md
+  - About GPyEDS:
+    - Background: background.md
+    - Pre-processing: data_preprocess.md
+    - Segmentation: segmentation.md
+    - Post-processing: post_process.md
+    - How to cite: cite.md
+  - Examples:
+    - QEMSCAN Data: Examples/QEMSCAN_build_data.ipynb
+    - Segmentation: Examples/Segmentation.ipynb
+  - Licence:
+    Licence: licence.md
