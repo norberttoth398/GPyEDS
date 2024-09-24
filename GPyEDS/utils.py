@@ -362,3 +362,243 @@ def build_conc_map(data, shape=None,):
 
     return conc_map, data_mask
 
+
+def plot_decomp(scores, comps, plot_return = False, elements = None, 
+                mask = None, smooth = None, ex_var = None):
+    """
+    Function to plot the results of the decomposition function. It may be called directly or
+    through the clustering function itself.
+    
+    Input
+    -----------
+    scores (3D numpy array) - array containing the scores assigned to every pixel
+                            with a separate image for every component.
+    comps (2D numpy array) - list of component compositions ordered identical to
+                            score maps.
+    plot_return (bool) - (optional) if True the matplotlib figure and axis objects
+                            are returned; default is False
+    elements (list) - (optional) x tick labels used for plotting cluster center
+                            compositions.
+    shape (list) - (optional) if scores matrix passed is 2D, this is the shape used
+                            to plot it on; default is to reshape first dimension as 
+                            close to square as possible, keeping the second dimension
+                            unchanged (not recommended)
+    
+    Return (if set True)
+    -----------
+    fig - matplotlib figure object for plot.
+    ax - matplotlib axis object for plot.
+    """
+    
+    if len(scores.shape) == 2:
+        if mask != None:
+            scores = get_img(scores, mask)
+        else:
+            raise ValueError("If scores passed are 2D array, mask object is required.")
+    elif len(scores.shape) == 3:
+        pass
+    else:
+        raise ValueError("Scores array needs to have 1 or 2 dimensions.")
+    
+    fig, ax = plt.subplots(len(comps), 2, figsize = (12,24))
+    
+    if elements is None:
+        elements = [i for i in range(len(comps[:]))]
+    else:
+        pass
+
+    
+    for i in range(len(comps)):
+        # vmin = np.min(scores[:,:,i])
+        # vmax = np.max(scores[:,:,i])
+        # diff = vmax - vmin
+        # vmin += 0.25*diff
+        # vmax -= 0.25*diff
+        vmin, vmax = np.percentile(scores[:,:,i][mask.astype("bool")], [75 ,25])
+        #print(scores[:,:,i].shape)
+        if smooth is not None:
+            img = ax[i][0].imshow(gaussian_filter(scores[:,:,i], mask, smooth), interpolation = "none",vmin = vmin, vmax = vmax)
+        else:
+            img = ax[i][0].imshow(scores[:,:,i], interpolation = "none",vmin = vmin, vmax = vmax)
+        fig.colorbar(img, ax = ax[i][0],fraction=0.02, pad=0.03)
+        ax[i][1].bar(range(len(elements)), comps[i], width = 0.5, tick_label = elements)
+        ax[i][1].plot([-0.5, len(elements)-0.5], [0, 0], 'k-')
+        if ex_var is not None:
+            ax[i][1].set_title("Explained Variance Ratio: " + str(np.round(ex_var[i], 4)))
+
+    fig.tight_layout()
+    
+    if plot_return == True:
+        return fig, ax
+    else:
+        return None
+    
+# def cluster(data, n_clusters = 2, method = "gmm", data_mask = None,
+#             plot = False,plot_return = False, elements = None,
+#            df_shape = None):
+#     """
+#     Function to perform clustering on the dataset passed using the selected clustering
+#     algorithm.
+    
+#     Input
+#     ------------
+#     data (either 2D or 3D numpy array) - the dataset to perform clustering on.
+#     n_clusters (int) - number of clusters to find, default is 2.
+#     method (str) - clustering algorithm to be used ["k_means", "gmm"]; default is k_means.
+#     data_mask  - 
+#     plot (bool) - Make True if results are to be plotted; default is false.
+#     plot_return (bool) - optional, if plot=true, make True to return fig and ax objects, default is false.
+#     elements (list/array) - optional, used when plotting results only, default is None.
+    
+#     Return
+#     ------------
+#     labels (2D numpy array) - assigned labels for each cluster found within the passed dataset. 
+#                     Shape is the same as first two dimensions of data if it's 3D, otherwise it's
+#                     the shape parameter passed to the function.
+#     centers (2D numpy array of shape [n_clusters, n_features]) - list of the centres of clusters
+#                     found in the dataset.
+#     fig, ax (matplotlib objects (both of length 2)) - only if both plot and plot_return are set True.
+#     """
+        
+#     if isinstance(data, pd.DataFrame):
+#         data, data_mask = build_conc_map(data, df_shape)
+#     else:
+#         pass
+    
+#     if len(data.shape) == 3:
+#         #only keep non 'nan' entries
+#         array = data[data_mask.astype('bool')]
+#     elif len(data.shape) == 2:
+#         #assume it's in the right form
+#         array = data
+#     else:
+#         raise ValueError("Input array needs to have 2 or 3 dimensions or be Pandas dataframe.")
+    
+#     array, params = feature_normalisation(array, return_params = True)
+    
+#     start = time.time()
+    
+        
+#     if method.lower() == "gmm":
+#         from sklearn.mixture import GaussianMixture
+#         #perform GMM
+#         gmm = GaussianMixture(n_clusters)
+#         labels = gmm.fit_predict(array) + 1
+#         centers = gmm.means_
+
+#     elif method.lower() == "k_means":
+#         from sklearn.cluster import KMeans
+#         #perform k_means clustering
+#         kmeans = KMeans(n_clusters=n_clusters, init = 'k-means++').fit(array)
+#         labels = kmeans.labels_
+#         centers = kmeans.cluster_centers_
+        
+#     else:
+#         raise ValueError("Method " + str(method) + " is not recognised.")
+        
+#     process_time = time.time() - start    
+#     print("Clustering processing time (s): " + str(process_time))
+    
+#     centers = rescale(centers, params)
+#     #convert to 2D image
+#     labels = get_img(labels, data_mask)
+    
+#     if plot == True:
+#         fig, ax = plot_cluster(labels, centers, plot_return = True ,elements=elements)
+#         if plot_return == True:
+#             return labels, centers, fig, ax
+#         else:
+#             pass
+#     else:
+#         pass
+    
+#     return labels, centers
+
+def decompose(data, n_components = 2, method = "pca", tol = 0.05, 
+              plot = False, plot_return = False, elements = None, 
+             data_mask = None, df_shape = None, smooth = None):
+    """
+    Function to perform the selected decomposition algorithm on the data passed. Ideal for use in
+    the initial data exploration steps.
+    
+    Input
+    ------------
+    data (either 2D or 3D numpy array) - the dataset to be decomposed.
+    n_components (int) - number of components to be kept after decomposition; default is 2.
+    method (str) - choose one of ["pca", "nmf"] as the algorithm to be used; default is pca.
+    tol (float) - tolerance value to be used for NMF decomposition; default is 0.05.
+    plot (bool) - Make True if results are to be plotted; default is false.
+    plot_return (bool) - optional, if plot=true, make True to return fig and ax objects; default is false.
+    elements (list/array) - optional, used when plotting results only; default is None.
+    data_mask - 
+    
+    Return
+    ------------
+    scores (3D numpy array) - scores relating each element in the original dataset to the 
+                            components found. Third dimension equal to n_components.
+    components (2D numpy array [n_components, n_features]) - Components found to describe the 
+                            dataset; ordered by the fraction of dataset variance described by
+                            each component.
+    fig, ax (single matplotlib objects) - only if both plot and plot_return are set True.
+    """
+    from sklearn import decomposition
+    
+    if isinstance(data, pd.DataFrame):
+        data, data_mask = build_conc_map(data, df_shape)
+    else:
+        pass
+    
+    if len(data.shape) == 3:
+        array = data[data_mask.astype('bool')]
+    elif len(data.shape) == 2:
+        #assume it's in the right form
+        array = data
+    else:
+        raise ValueError("Input array needs to have 2 or 3 dimensions or be Pandas dataframe.")
+     
+      
+    
+    start = time.time()
+    
+    if method.lower() == "pca":
+        # array, params = feature_normalisation(array, return_params = True)
+        # array = np.nan_to_num(array)
+        #perform PCA decomposition
+        pca = decomposition.PCA(n_components = n_components)
+        scores = pca.fit_transform(array)
+        components = pca.components_
+        ex_var = pca.explained_variance_ratio_
+        print(ex_var)
+        
+    elif method.lower() == "nmf":
+        array, params = feature_normalisation(array, return_params = True, mean_norm = False)
+        array = np.nan_to_num(array)
+        #perform NMF decomposition
+        nmf = decomposition.NMF(n_components = n_components, tol = tol)
+        scores = nmf.fit_transform(array)
+        components = nmf.components_
+        ex_var = None
+        
+    else:
+        raise ValueError("Method " + str(method) + " is not recognised.")
+    
+    process_time = time.time() - start    
+    print("Decomposition processing time (s): " + str(process_time))
+
+    
+    #components = rescale(components, params)    
+    scores_2d = np.zeros((data_mask.shape[0], data_mask.shape[1], n_components))
+    for i in range(n_components):
+        scores_2d[:,:,i] = get_img(scores[:,i], data_mask)
+    
+    if plot == True:
+        fig, ax = plot_decomp(scores_2d, components, plot_return = True, elements=elements, smooth=smooth,
+                               mask=data_mask, ex_var=ex_var)
+        if plot_return == True:
+            return scores_2d, components, fig, ax
+        else:
+            pass
+    else:
+        pass
+    
+    return scores_2d, components
