@@ -19,10 +19,12 @@ nav:
     - Pre-processing: data_preprocess.md
     - Segmentation: segmentation.md
     - Post-processing: post_process.md
+    - EDS2CHEM: eds2chem.md
     - How to cite: cite.md
   - Examples:
     - QEMSCAN Data: Examples/QEMSCAN_build_data.ipynb
     - Segmentation: Examples/Segmentation.ipynb
+    - EDS2CHEM Calibration: Examples/EDS2CHEM_example.ipynb
   - References:
     - GPAM: references/gpam.md
     - Normalisation: references/mcn.md
