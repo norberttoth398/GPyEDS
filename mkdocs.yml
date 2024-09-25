@@ -13,6 +13,7 @@ plugins:
 
 nav:
   - GPyEDS: index.md
+  - Install: install.md
   - About GPyEDS:
     - Background: background.md
     - Pre-processing: data_preprocess.md
@@ -22,5 +23,12 @@ nav:
   - Examples:
     - QEMSCAN Data: Examples/QEMSCAN_build_data.ipynb
     - Segmentation: Examples/Segmentation.ipynb
+  - References:
+    - GPAM: references/gpam.md
+    - Normalisation: references/mcn.md
+    - Neural Network: references/nn.md
+    - Spatial Filters: references/spatial_filters.md
+    - Utils: references/utils.md
+    - EDS2CHEM: references/eds2chem.md
   - Licence:
     Licence: licence.md
