@@ -26,14 +26,14 @@ def create_two_layer_GPAM_from_data(input_data, num_inducing = 50, return_layers
     inducing_variable1 = gpflow.inducing_variables.InducingPoints(Z.copy())
     gp_layer1 = gpflux.layers.GPLayer(
         kernel1, inducing_variable1, num_data=num_data, num_latent_gps=n_latent, mean_function=gpflow.mean_functions.Zero()
-    )
+    ) 
 
     kernel2 = gpflow.kernels.SquaredExponential(lengthscales=[1]*n_latent)
     inducing_variable2 = gpflow.inducing_variables.InducingPoints(np.random.rand(num_inducing,n_latent))
     gp_layer2 = gpflux.layers.GPLayer(
         kernel2,
         inducing_variable2,
-        num_data=num_data,
+        num_data=num_data, 
         num_latent_gps=input_data.shape[1],
         mean_function=gpflow.mean_functions.Zero(),
     )
