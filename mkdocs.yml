@@ -22,6 +22,7 @@ nav:
     - EDS2CHEM: eds2chem.md
     - How to cite: cite.md
   - Examples:
+    - Data Sources for Examples: Examples/Data_sources.md
     - QEMSCAN Data: Examples/QEMSCAN_build_data.ipynb
     - Segmentation: Examples/Segmentation.ipynb
     - EDS2CHEM Calibration: Examples/EDS2CHEM_example.ipynb
