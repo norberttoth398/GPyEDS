@@ -1,4 +1,9 @@
 tqdm
+mkdocs-jupyter
+mkdocstrings
+mkdocs-toc-md
+mkdocstrings-python
+myst-parser
 absl-py
 array-record==0.4.0
 asttokens==2.4.1
